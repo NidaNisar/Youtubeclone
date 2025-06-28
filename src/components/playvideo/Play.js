@@ -11,10 +11,13 @@ import { API_KEY } from '../../data';
 import { useState ,useEffect} from "react";
 import moment from 'moment';
 import { value_converter } from '../../data'
-const Play = ({videoid}) => {
-  console.log(videoid);
+import { useParams } from 'react-router-dom';
+const Play = () => {
+
+  const{videoid}=useParams();
    const[apidata,setapidata]=useState(null)
     const[channeldata,setchanneldata]=useState(null)
+    const[comments,setcomments]=useState([]);
       const  fetchapidata= async()=> {
       const videolist=`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoid}&key=${API_KEY}`
       const datas= await fetch(videolist);
@@ -22,21 +25,31 @@ const Play = ({videoid}) => {
       setapidata(response.items[0]);
           
       }
-      const  fetchchanneldata= async()=> {
-      const videolist=  `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id={apidata.snippet.channelid}&key=${API_KEY}
-`
 
-      const datas= await fetch(videolist);
-      const response= await datas.json();
-      setchanneldata(response.items[0]);
-          
+      const  fetchchanneldata= async()=> {
+      const channellist=  `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id=${apidata.snippet.channelId}&key=${API_KEY}`
+
+      const channeldata= await fetch(channellist);
+      const channelresponse= await channeldata.json();
+       if (!channelresponse.items || channelresponse.items.length === 0) {
+      console.error("No channel data returned.");
+      return;}
+      setchanneldata(channelresponse.items[0]);
+     
+
+          const url=`https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&videoId=${videoid}&key=${API_KEY}`;
+          const commentdata= await fetch(url);
+      const  commentresponse= await commentdata.json();
+      setcomments(commentresponse.items);
       }
       useEffect(()=>{
               fetchapidata();
           },[])
            useEffect(()=>{
-              fetchchanneldata();
-          },[])
+             if (apidata && apidata.snippet && apidata.snippet.channelId) {
+               fetchchanneldata();
+  }
+          },[apidata])
     return (
     <div className='play-video'>
        
@@ -64,7 +77,7 @@ const Play = ({videoid}) => {
           <img src={channeldata?channeldata.snippet.thumbnails.default.url:""} alt=""/>
           <div>
             <p>{apidata?apidata.snippet.channelTitle:''}</p>
-        <span>1M Subscriber</span>
+        <span>{ value_converter(channeldata?channeldata.statistics.subscriberCount:"1M")} Subscriber</span>
         </div>
         <button>Subscribe</button>
         </div>
@@ -73,28 +86,25 @@ const Play = ({videoid}) => {
               
                <hr/>
                <h4>{value_converter(apidata?apidata.statistics.commentCount:'130')} Comments</h4>
-               <div class="comment">
-                <img src={user_profile} alt=""/>
+               {comments.map((item,index)=>{
+                return(
+                <div class="comment">
+                <img src={item.snippet.topLevelComment.snippet.authorProfileImageUrl} alt=""/>
                 <div>
-                  <h3>A global computer provide variety of internet and cc of interconnected network</h3>
+                  <h3>{item.snippet.topLevelComment.snippet.authorDisplayName}</h3>
+                  <p>{item.snippet.topLevelComment.snippet.textDisplay}</p>
                   <div class="comment-action">
                     <img src={like} alt=""/>
-                    <span>244</span>
+                    <span>{value_converter(item.snippet.topLevelComment.snippet.likeCount)}</span>
                      <img src={dislike} alt=""/>
                   </div>
                 </div>
                </div>
-                 <div class="comment">
-                <img src={user_profile} alt=""/>
-                <div>
-                  <h3>A global computer provide variety of internet and cc of interconnected network</h3>
-                  <div class="comment-action">
-                    <img src={like} alt=""/>
-                    <span>244</span>
-                     <img src={dislike} alt=""/>
-                  </div>
-                </div>
-               </div>
+                
+                )
+               })}
+              
+              
         </div> 
     </div>
   );
