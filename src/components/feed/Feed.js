@@ -5,16 +5,33 @@ import { Link } from 'react-router-dom'
 import "./feed.css"
 import {API_KEY} from "../../data"
 import { value_converter } from '../../data'
-// AIzaSyA06NZIZV7gLSky3IJKRmmqUZtlUajd9KA
+
 const Feed = ({category}) => {
   const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY
     const[data,setdata]=useState([])
+    
+  const [error, setError] = useState(null);
+
     const  fetchdata= async()=> {
-    const videolist=`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=US&videoCategoryId=${category}&maxResults=50&key=${API_KEY} `
-    const datas= await fetch(videolist);
-    const response= await datas.json();
-    setdata(response.items);
-        
+    // const videolist=`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=US&videoCategoryId=${category}&maxResults=50&key=${API_KEY}`
+    // const datas= await fetch(videolist);
+    // const response= await datas.json();
+    // setdata(response.items);
+         try {
+      const videolist = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=US&videoCategoryId=${category}&maxResults=50&key=${API_KEY}`;
+      const res = await fetch(videolist);
+      const response = await res.json();
+
+      if (response.items) {
+        setdata(response.items);
+      } else {
+        setError(response.error?.message || "Something went wrong");
+        setdata([]); // fallback empty
+      }
+    } catch (err) {
+      console.error("Fetch failed:", err);
+      setError("Failed to fetch videos");
+    }
     }
     useEffect(()=>{
         fetchdata();
