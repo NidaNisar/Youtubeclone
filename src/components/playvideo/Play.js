@@ -15,6 +15,7 @@ import { useParams } from 'react-router-dom';
 const Play = () => {
 
   const{videoid}=useParams();
+  const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY
    const[apidata,setapidata]=useState(null)
     const[channeldata,setchanneldata]=useState(null)
     const[comments,setcomments]=useState([]);

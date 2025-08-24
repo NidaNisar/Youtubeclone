@@ -12,6 +12,7 @@ import { API_KEY, value_converter } from '../../data';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 const Recommended = ({categoryid}) => {
+  const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY
     const[apidata,setapidata]=useState([])
     const fetchdata= async ()=>{
         const realted_url=`https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&maxResults=45&regionCode=US&videoCategoryId=${categoryid}&key=${API_KEY}`;

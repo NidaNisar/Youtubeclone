@@ -7,6 +7,7 @@ import {API_KEY} from "../../data"
 import { value_converter } from '../../data'
 // AIzaSyA06NZIZV7gLSky3IJKRmmqUZtlUajd9KA
 const Feed = ({category}) => {
+  const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY
     const[data,setdata]=useState([])
     const  fetchdata= async()=> {
     const videolist=`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=US&videoCategoryId=${category}&maxResults=50&key=${API_KEY} `
